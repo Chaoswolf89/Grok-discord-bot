@@ -1,3 +1,4 @@
 discord.py
 xai-sdk
 PyNaCl
+BOT_OWNER_ID=1506573608082997270
