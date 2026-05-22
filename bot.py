@@ -57,7 +57,7 @@ async def ask(interaction: discord.Interaction, prompt: str):
         logger.info(f"📨 Query from {interaction.user} in channel {channel_id}")
 
         response = grok.chat.completions.create(
-            model="grok-4",
+            model="grok-4.3",
             messages=[
                 {"role": "system", "content": "You are Grok, a helpful and maximally truthful AI built by xAI."}
             ] + conversation_history[channel_id],
