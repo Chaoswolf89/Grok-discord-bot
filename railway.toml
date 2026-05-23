@@ -5,8 +5,3 @@ buildCommand = "pip install -r requirements.txt"
 [deploy]
 startCommand = "python bot.py"
 restartPolicyMaxRetries = 10
-
-[healthcheck]
-path = "/"
-interval = 30
-timeout = 10
