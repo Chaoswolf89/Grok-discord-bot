@@ -78,11 +78,9 @@ async def ask(interaction: discord.Interaction, question: str):
         return
     user_cooldowns[user_id] = now
 
-    # More defensive defer
     try:
         await interaction.response.defer()
     except:
-        # If defer fails, try to send a quick ephemeral message instead
         try:
             await interaction.response.send_message("Thinking...", ephemeral=True)
         except:
@@ -111,7 +109,6 @@ async def ask(interaction: discord.Interaction, question: str):
         save_memory()
 
         await interaction.followup.send(reply_text)
-
     except Exception as e:
         try:
             await interaction.followup.send(f"❌ Error: {str(e)[:200]}")
