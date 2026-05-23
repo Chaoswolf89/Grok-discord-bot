@@ -50,16 +50,16 @@ async def on_ready():
     print(f"✅ {client.user} is online on {len(client.guilds)} servers!")
 
 
-# ===================== CHAT WITH MEMORY =====================
+# ===================== ASK WITH MEMORY =====================
 @tree.command(name="ask", description="Chat with Grok (Memory enabled)")
 @app_commands.describe(question="Your question")
 async def ask(interaction: discord.Interaction, question: str):
     await interaction.response.defer()
-    
+
     user_id = interaction.user.id
     now = time.time()
     if user_id in user_cooldowns and now - user_cooldowns[user_id] < COOLDOWN_SECONDS:
-        return await interaction.followup.send("⏳ Slow down!")
+        return await interaction.followup.send("⏳ Slow down! Wait a moment.")
 
     user_cooldowns[user_id] = now
 
@@ -84,22 +84,22 @@ async def ask(interaction: discord.Interaction, question: str):
 
         await interaction.followup.send(reply)
     except Exception as e:
-        await interaction.followup.send(f"❌ Error: {str(e)[:300]}")
+        await interaction.followup.send(f"❌ Error: {str(e)[:250]}")
 
 
 # ===================== IMAGINE =====================
-@tree.command(name="imagine", description="Generate images with Grok (NSFW allowed)")
+@tree.command(name="imagine", description="Generate images (NSFW allowed)")
 @app_commands.describe(prompt="Describe the image")
 async def imagine(interaction: discord.Interaction, prompt: str):
     await interaction.response.defer()
     try:
-        await interaction.followup.send("🎨 Generating...")
+        await interaction.followup.send("🎨 Generating image...")
         response = xai_client.image.sample(prompt=prompt)
         embed = discord.Embed(title="Grok Imagine", description=prompt[:200], color=0xFF00FF)
         embed.set_image(url=response.images[0].url)
         await interaction.followup.send(embed=embed)
     except Exception as e:
-        await interaction.followup.send(f"❌ Error: {str(e)[:300]}")
+        await interaction.followup.send(f"❌ Error: {str(e)[:250]}")
 
 
 # ===================== UTILITY =====================
@@ -108,54 +108,46 @@ async def clear(interaction: discord.Interaction):
     channel_id = str(interaction.channel_id)
     if channel_id in conversation_memory:
         del conversation_memory[channel_id]
-        await interaction.response.send_message("🧹 Memory cleared!")
+        await interaction.response.send_message("🧹 Memory cleared for this channel.")
     else:
-        await interaction.response.send_message("Nothing to clear.")
+        await interaction.response.send_message("No memory to clear.")
 
 
-@tree.command(name="ping", description="Check latency")
+@tree.command(name="ping", description="Check bot latency")
 async def ping(interaction: discord.Interaction):
     latency = round(client.latency * 1000)
     await interaction.response.send_message(f"🏓 Pong! `{latency}ms`")
 
 
-@tree.command(name="uptime", description="Show how long the bot has been running")
+@tree.command(name="uptime", description="Show bot uptime")
 async def uptime(interaction: discord.Interaction):
     await interaction.response.send_message(f"⏱️ Uptime: **{get_uptime()}**")
 
 
 @tree.command(name="help", description="Show all commands")
 async def help_command(interaction: discord.Interaction):
-    embed = discord.Embed(title="Grok Bot - Ultimate Edition", color=0x1DA1F2)
-    embed.add_field(name="Main", value="/ask\n/imagine", inline=False)
+    embed = discord.Embed(title="Grok Bot - Ultimate", color=0x1DA1F2)
+    embed.add_field(name="Main", value="/ask [question]\n/imagine [prompt]", inline=False)
     embed.add_field(name="Utility", value="/clear\n/ping\n/uptime\n/help", inline=False)
-    embed.add_field(name="Owner", value="/servers\n/reload", inline=False)
+    embed.add_field(name="Owner", value="/servers", inline=False)
     await interaction.response.send_message(embed=embed)
 
 
-# ===================== OWNER COMMANDS =====================
-@tree.command(name="servers", description="List servers (Owner only)")
+# ===================== OWNER =====================
+@tree.command(name="servers", description="Show server count (Owner only)")
 async def servers(interaction: discord.Interaction):
     if not is_owner(interaction):
         return await interaction.response.send_message("❌ Owner only", ephemeral=True)
     await interaction.response.send_message(f"🤖 Bot is in **{len(client.guilds)}** servers.")
 
 
-@tree.command(name="reload", description="Reload slash commands (Owner only)")
-async def reload(interaction: discord.Interaction):
-    if not is_owner(interaction):
-        return await interaction.response.send_message("❌ Owner only", ephemeral=True)
-    await tree.sync()
-    await interaction.response.send_message("✅ Commands reloaded!")
-
-
-# ===================== MENTION RESPONSE =====================
+# ===================== AUTO RESPONSE =====================
 @client.event
 async def on_message(message):
     if message.author == client.user:
         return
     if client.user in message.mentions:
-        responses = ["Yes?", "What's up?", "I'm here!", "Need something?"]
+        responses = ["Yes?", "I'm here!", "What can I help with?", "Hey there!"]
         await message.channel.send(random.choice(responses))
 
 
